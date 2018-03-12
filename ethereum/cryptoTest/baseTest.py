@@ -7,6 +7,7 @@ except ImportError:
 
     def sha3_256(x): return _sha3.keccak_256(x).digest()
 from py_ecc.secp256k1 import privtopub, ecdsa_raw_sign, ecdsa_raw_recover
+from py_ecc.secp256k1.secp256k1 import G, multiply
 import sys
 import rlp
 from rlp.sedes import big_endian_int, BigEndianInt, Binary
@@ -596,42 +597,78 @@ def curveTest():
     # print("sab public key (hex):\t", sab_publicKey)
     print("sab public key (int):\t", parse_as_int("0x"+sab_publicKey))
 
+
+
+def ECC_study():
+    print("\n"*3)
+    print("-"*20+"\tBasic Info-----------------------\n")
+    a =         "93a9eaace5603b84ce9e16d906d18bdb1e8a46a4936f587360544ceb926de537"
+    b =         "d874a98ded77bafb3780faaaa201cf2720d044777ee28fc7fe3b308ce7b58984"
+    r_string =  "d874a98ded77"
+    print("A->\t", multiply(G, parse_as_int("0x"+a)))
+    print("rA->\t", multiply(G, parse_as_int("0x"+r_string)*parse_as_int("0x"+a)))
+    print("R->\t", multiply(G, parse_as_int("0x"+r_string)))
+    print("aR->\t", multiply(G, parse_as_int("0x"+a)*parse_as_int("0x"+r_string)))
+
+    print("*"*40)
+    print("A->\t", multiply(G, parse_as_int("0x" + a)))
+    A_x, A_y = multiply(G, parse_as_int("0x" + a))
+    print("rA->\t", multiply( (A_x,A_y), parse_as_int("0x"+r_string) ))
+    print("R->\t", multiply(G, parse_as_int("0x" + r_string)))
+    R_x, R_y = multiply(G, parse_as_int("0x" + r_string))
+    print("aR->\t", multiply((R_x, R_y), parse_as_int("0x"+a)))
+
+
+
+
 def monero_protocol():
     print("\n"*3)
     print("-"*20+"\tSender-----------------------\n")
-    a =         "0x7d29fab185a33e2cd955812397354c472d2b84615b645aa135ff539f6b0d70d5"
-    b =         "0xd874a98ded77bafb3780faaaa201cf2720d044777ee28fc7fe3b308ce7b58984"
-    r_string =  "0xd874a98ded77bafb3780faaaa201cf2720d044777ee28fc7fe3b308ce7b58982"
-    x, y = privtopub(normalize_key(r_string))
-    R_string = encode_hex(encode_int32(x)+encode_int32(y))
-    x, y = privtopub(normalize_key(a))
-    A = encode_hex(encode_int32(x)+encode_int32(y))
-    x, y = privtopub(normalize_key(b))
-    B = encode_hex(encode_int32(x) + encode_int32(y))
+    a =         "93a9eaace5603b84ce9e16d906d18bdb1e8a46a4936f587360544ceb926de537"
+    b =         "d874a98ded77bafb3780faaaa201cf2720d044777ee28fc7fe3b308ce7b58984"
+    r_string =  "d874a98ded77"
+    # r_x, r_y = privtopub(normalize_key(r_string))
+    # R_string = encode_hex(encode_int32(r_x)+encode_int32(r_y))
+    # a_x, a_y = privtopub(normalize_key(a))
+    # A = encode_hex(encode_int32(a_x)+encode_int32(a_y))
+    # b_x, b_y = privtopub(normalize_key(b))
+    # B = encode_hex(encode_int32(b_x) + encode_int32(b_y))
+
+    print(bytearray.fromhex('d874a98ded77'))
+    print(privtopub(bytearray.fromhex('d874a98ded77')))
+
+
+
     # print("r:\t" , r_string)
     # print("R:\t" , R_string)
     # print("\n")
     #
     # print("a:\t",a)
-    # print("A:\t",A)
+    # print("A:\t",parse_as_int("0x"+A))
+    # print("address a:\t", sha3(encode_int32(x) + encode_int32(y))[12:])
     # print("\n")
     #
     # print("b:\t",b)
     # print("B:\t",B)
     # print("\n")
 
-    print("r (int):\t", parse_as_int(r_string))
-    print("a (int):\t", parse_as_int(a))
-    print("b (int):\t", parse_as_int(b))
-    print("\n")
-    print("A (int):\t" , parse_as_int("0x"+A))
-    print("B (int):\t" , parse_as_int("0x"+B))
-    print("R (int):\t" , parse_as_int("0x"+R_string))
-    print("\n")
+    # print("r (int):\t", parse_as_int(r_string))
+    # print("a (int):\t", parse_as_int(a))
+    # print("b (int):\t", parse_as_int(b))
+    # print("\n")
+    # print("A (int):\t" , parse_as_int("0x"+A))
+    # print("B (int):\t" , parse_as_int("0x"+B))
+    # print("R (int):\t" , parse_as_int("0x"+R_string))
+    # print("\n")
     #
-    print("rA (int):\t" , parse_as_int(r_string)*parse_as_int("0x"+A))
-    print("aR (int):\t" , parse_as_int(a)*parse_as_int("0x"+R_string))
-    H_rA = encode_hex(sha3(parse_as_int(r_string) * parse_as_int("0x" + A)))
+    # print("rA (int) ------:\t" , parse_as_int(r_string)*a_x, parse_as_int(r_string)*a_y)
+    # print(" :\t", parse_as_int(r_string)* parse_as_int("0x"+A) )
+    # print(" :\t", parse_as_int(a)* parse_as_int("0x"+R_string) )
+    # print(decode_hex("0xd874a98ded77baf"))
+    # print(" :\t",  decode_int(encode_int32(a_x)+encode_int32(a_y)))
+    # print(" :\t",  decode_int(encode_int32(a_x)+encode_int32(a_y)))
+    # print("aR (int):\t" , parse_as_int(a)*r_x, parse_as_int(a)*r_y)
+    # H_rA = encode_hex(sha3(parse_as_int(r_string) * parse_as_int("0x" + A)))
     # print("H(rA) hex:\t", H_rA)
     # print("H(rA) int:\t", parse_as_int("0x"+H_rA))
     # x,y = privtopub(normalize_key(H_rA))
@@ -671,15 +708,18 @@ def monero_protocol():
 
 def main():
     print("\n------------- hash function test -----------\n")
-    k = normalize_key("17d08f5fe8c77af811caa0c9a187e668ce3b74a99acc3f6d976f075fa8e0be55")
+    k = normalize_key("2075b1d9c124ea673de7273758ed6de14802a9da8a73ceb74533d7c312ff6acd")
     x, y = privtopub(k)
     print("\nPublic Key(int):\t",x,y)
     print( "\nPublic Key(hex):\t",encode_hex(encode_int32(x)+encode_int32(y)),"\n")
     addrBytes = sha3(encode_int32(x) + encode_int32(y))[12:]
     addr = checksum_encode(addrBytes)
     print("\nAddress(hex):\t",addr)
-    curveTest()
-    monero_protocol()
+    print("\n\nPublic Key 1:\t", decode_int(encode_int32(x)+encode_int32(y)) )
+    print("\n\nPublic Key 2:\t", parse_as_int("0x"+encode_hex(encode_int32(x)+encode_int32(y))) )
+    # curveTest()
+    # monero_protocol()
+    ECC_study()
 
 
 
